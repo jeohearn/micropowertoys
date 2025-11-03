@@ -28,5 +28,6 @@
   <ItemGroup>
     <ProjectReference Include="..\settings-ui\Settings.UI.Library\Settings.UI.Library.csproj" />
     <ProjectReference Include="..\common\ManagedCommon\ManagedCommon.csproj" />
+    <ProjectReference Include="..\common\GPOWrapperProjection\GPOWrapperProjection.csproj" />
   </ItemGroup>
 </Project>

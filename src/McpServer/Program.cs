@@ -10,7 +10,9 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using ModelContextProtocol.Server;
+using PowerToys.GPOWrapperProjection;
 using PowerToys.McpServer.Tools;
+using GpoProjection = PowerToys.GPOWrapperProjection.GPOWrapper;
 
 namespace PowerToys.McpServer
 {
@@ -27,6 +29,15 @@ namespace PowerToys.McpServer
 
             try
             {
+                var mcpGpoState = GpoProjection.GetConfiguredMcpServerEnabledValue();
+                if (mcpGpoState == GpoRuleConfigured.Disabled)
+                {
+                    const string policyMessage = "MCP server launch blocked by Group Policy.";
+                    Logger.LogWarning(policyMessage);
+                    Console.Error.WriteLine(policyMessage);
+                    return 0;
+                }
+
                 var builder = Host.CreateApplicationBuilder(args);
 
                 // Configure all logs to go to stderr (required for MCP protocol)

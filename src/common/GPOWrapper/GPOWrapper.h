@@ -56,6 +56,7 @@ namespace winrt::PowerToys::GPOWrapper::implementation
         static GpoRuleConfigured GetAllowedAdvancedPasteOnlineAIModelsValue();
         static GpoRuleConfigured GetConfiguredNewPlusEnabledValue();
         static GpoRuleConfigured GetConfiguredWorkspacesEnabledValue();
+        static GpoRuleConfigured GetConfiguredMcpServerEnabledValue();
         static GpoRuleConfigured GetConfiguredMwbClipboardSharingEnabledValue();
         static GpoRuleConfigured GetConfiguredMwbFileTransferEnabledValue();
         static GpoRuleConfigured GetConfiguredMwbUseOriginalUserInterfaceValue();
