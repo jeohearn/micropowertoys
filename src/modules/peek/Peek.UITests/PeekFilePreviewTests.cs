@@ -9,6 +9,7 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.PowerToys.UITest;
@@ -33,6 +34,117 @@ public class PeekFilePreviewTests : UITestBase
     public PeekFilePreviewTests()
         : base(PowerToysModule.PowerToysSettings, WindowSize.Small_Vertical)
     {
+    }
+
+    static PeekFilePreviewTests()
+    {
+        FixSettingsFileBeforeTests();
+    }
+
+    private static readonly JsonSerializerOptions IndentedJsonOptions = new() { WriteIndented = true };
+
+    private static void FixSettingsFileBeforeTests()
+    {
+        try
+        {
+            // Common base path for PowerToys settings
+            string powerToysSettingsDirectory = Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                "Microsoft",
+                "PowerToys");
+
+            // Fix Peek module settings
+            string peekDirectory = Path.Combine(powerToysSettingsDirectory, "Peek");
+            string peekSettingsPath = Path.Combine(peekDirectory, "settings.json");
+
+            // Ensure directory exists
+            Directory.CreateDirectory(peekDirectory);
+
+            // Check if file exists and is not empty
+            string existingPeekJson = string.Empty;
+            if (File.Exists(peekSettingsPath))
+            {
+                existingPeekJson = File.ReadAllText(peekSettingsPath);
+            }
+
+            // If file doesn't exist or is empty, create default settings
+            if (string.IsNullOrWhiteSpace(existingPeekJson))
+            {
+                string peekSettingsContent = @"{
+                  ""name"": ""Peek"",
+                  ""version"": ""1.0"",
+                  ""properties"": {
+                    ""ActivationShortcut"": {
+                      ""win"": false,
+                      ""ctrl"": true,
+                      ""alt"": false,
+                      ""shift"": false,
+                      ""code"": 32,
+                      ""key"": ""Space""
+                    },
+                    ""AlwaysRunNotElevated"": {
+                      ""value"": true
+                    },
+                    ""CloseAfterLosingFocus"": {
+                      ""value"": false
+                    },
+                    ""ConfirmFileDelete"": {
+                      ""value"": true
+                    },
+                    ""EnableSpaceToActivate"": {
+                      ""value"": false
+                    }
+                  }
+                }";
+                File.WriteAllText(peekSettingsPath, peekSettingsContent);
+                Debug.WriteLine($"Created default Peek settings file at {peekSettingsPath}");
+            }
+            else
+            {
+                // Parse and update existing settings
+                using var peekDoc = JsonDocument.Parse(existingPeekJson);
+                var peekSettings = JsonSerializer.Deserialize<Dictionary<string, object>>(existingPeekJson)
+                                   ?? throw new InvalidOperationException("Failed to deserialize Peek settings");
+
+                // Get properties section
+                var propertiesElement = (JsonElement)peekSettings["properties"];
+                var properties = JsonSerializer.Deserialize<Dictionary<string, object>>(propertiesElement.GetRawText())
+                                 ?? throw new InvalidOperationException("Failed to deserialize properties");
+
+                // Update only the required properties: ActivationShortcut and EnableSpaceToActivate
+                properties["ActivationShortcut"] = new Dictionary<string, object>
+                {
+                    { "win", false },
+                    { "ctrl", true },
+                    { "alt", false },
+                    { "shift", false },
+                    { "code", 32 },
+                    { "key", "Space" },
+                };
+
+                properties["EnableSpaceToActivate"] = new Dictionary<string, object>
+                {
+                    { "value", false },
+                };
+
+                peekSettings["properties"] = properties;
+
+                // Serialize and save Peek settings
+                string peekSettingsJson = JsonSerializer.Serialize(peekSettings, IndentedJsonOptions);
+                File.WriteAllText(peekSettingsPath, peekSettingsJson);
+
+                Debug.WriteLine($"Successfully updated Ctrl+Space shortcut in settings file at {peekSettingsPath}");
+            }
+
+            // Disable all modules except Peek in global settings
+            SettingsConfigHelper.ConfigureGlobalModuleSettings("Peek");
+
+            Debug.WriteLine("Successfully updated global settings - disabled all modules except Peek");
+        }
+        catch (Exception ex)
+        {
+            Assert.Fail($"ERROR in FixSettingsFileBeforeTests: {ex.Message}");
+        }
     }
 
     [TestInitialize]
