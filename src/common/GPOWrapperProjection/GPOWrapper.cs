@@ -66,5 +66,15 @@ namespace PowerToys.GPOWrapperProjection
         {
             return (GpoRuleConfigured)PowerToys.GPOWrapper.GPOWrapper.GetConfiguredWorkspacesEnabledValue();
         }
+
+        public static GpoRuleConfigured GetConfiguredMcpServerEnabledValue()
+        {
+            return (GpoRuleConfigured)PowerToys.GPOWrapper.GPOWrapper.GetConfiguredMcpServerEnabledValue();
+        }
+
+        public static GpoRuleConfigured GetConfiguredMcpEnabledValue()
+        {
+            return GetConfiguredMcpServerEnabledValue();
+        }
     }
 }

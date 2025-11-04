@@ -200,6 +200,10 @@ namespace winrt::PowerToys::GPOWrapper::implementation
     {
         return static_cast<GpoRuleConfigured>(powertoys_gpo::getConfiguredWorkspacesEnabledValue());
     }
+    GpoRuleConfigured GPOWrapper::GetConfiguredMcpServerEnabledValue()
+    {
+        return static_cast<GpoRuleConfigured>(powertoys_gpo::getConfiguredMcpServerEnabledValue());
+    }
     GpoRuleConfigured GPOWrapper::GetConfiguredMwbClipboardSharingEnabledValue()
     {
         return static_cast<GpoRuleConfigured>(powertoys_gpo::getConfiguredMwbClipboardSharingEnabledValue());
